@@ -1,9 +1,12 @@
+import Navbar from './layouts/Navbar.jsx';
+import Home from './assets/pages/home/Home.jsx';
+
 function App() {
   return (
-    <div>
-      <h1>Portfolio Keyzol</h1>
-      <p>Calon Fullstack Developer</p>
-    </div>
+    <>
+      <Navbar />
+      <Home />
+    </>
   );
 }
 
