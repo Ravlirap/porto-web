@@ -1,6 +1,9 @@
 import Hero from '../../components/Hero.jsx';
 import About from '../../components/About.jsx';
 import Skills from '../../components/Skills.jsx';
+import Projects from '../../components/Projects.jsx';
+import Certificates from '../../components/Certificates.jsx';
+import Contact from '../../components/Contact.jsx';
 import Footer from '../../components/Footer.jsx';
 
 function Home() {
@@ -9,6 +12,9 @@ function Home() {
       <Hero />
       <About />
       <Skills />
+      <Projects />
+      <Certificates />
+      <Contact />
       <Footer />
     </main>
   );

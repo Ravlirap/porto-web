@@ -4,18 +4,19 @@ const navItems = [
   { label: 'Home', target: 'hero' },
   { label: 'About', target: 'about' },
   { label: 'Skills', target: 'skills' },
-  { label: 'Contact', target: 'footer' }
+  { label: 'Projects', target: 'projects' },
+  { label: 'Certificates', target: 'certificates' },
+  { label: 'Contact', target: 'contact' }
 ];
 
 function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [activeSection, setActiveSection] = useState('hero');
 
-  // Intersection Observer to detect current active section
   useEffect(() => {
     const observerOptions = {
       root: null,
-      rootMargin: '-80px 0px -40% 0px', // Adjusted for navbar height
+      rootMargin: '-64px 0px -60% 0px', // Adjusted for navbar height (64px)
       threshold: 0.1
     };
 
@@ -47,7 +48,7 @@ function Navbar() {
     setIsMenuOpen(false);
     const element = document.getElementById(targetId);
     if (element) {
-      const offset = 80; // height of fixed navbar
+      const offset = 64; // height of fixed navbar
       const bodyRect = document.body.getBoundingClientRect().top;
       const elementRect = element.getBoundingClientRect().top;
       const elementPosition = elementRect - bodyRect;
@@ -65,11 +66,10 @@ function Navbar() {
     <header className="navbar-wrapper">
       <div className="navbar-container">
         <a href="#hero" className="logo" onClick={(e) => handleLinkClick(e, 'hero')}>
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'var(--accent-primary)' }}>
-            <polyline points="16 18 22 12 16 6"></polyline>
-            <polyline points="8 6 2 12 8 18"></polyline>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'var(--text-primary)' }}>
+            <polygon points="12 2 2 22 22 22"></polygon>
           </svg>
-          Keyzol
+          <span>Rav.dev</span>
         </a>
 
         {/* Desktop Navigation */}
@@ -96,12 +96,12 @@ function Navbar() {
           aria-label="Toggle navigation menu"
         >
           {isMenuOpen ? (
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
               <line x1="18" y1="6" x2="6" y2="18"></line>
               <line x1="6" y1="6" x2="18" y2="18"></line>
             </svg>
           ) : (
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
               <line x1="4" y1="12" x2="20" y2="12"></line>
               <line x1="4" y1="6" x2="20" y2="6"></line>
               <line x1="4" y1="18" x2="20" y2="18"></line>
