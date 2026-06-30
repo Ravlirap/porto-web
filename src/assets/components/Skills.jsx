@@ -1,3 +1,5 @@
+import { motion } from 'framer-motion';
+
 function Skills() {
   const skillGroups = [
     {
@@ -49,17 +51,32 @@ function Skills() {
   return (
     <section id="skills" className="section">
       <div className="container">
-        <div className="section-header">
+        <motion.div 
+          className="section-header"
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+        >
           <span className="section-label">02. Expertise</span>
           <h2 className="section-title">Skills & Technologies</h2>
           <p className="section-subtitle">A list of languages, frameworks, libraries, and tools I work with.</p>
-        </div>
+        </motion.div>
         
-        <div className="skills-grid">
+        <div className="grid grid-2">
           {skillGroups.map((group, index) => (
-            <div key={index} className="premium-card">
+            <motion.div 
+              key={index} 
+              className="glass-card"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: index * 0.1 }}
+            >
               <h3 className="skills-card-title">
-                {group.icon}
+                <div className="skill-icon-wrapper">
+                  {group.icon}
+                </div>
                 {group.category}
               </h3>
               <div className="skills-wrapper">
@@ -69,7 +86,7 @@ function Skills() {
                   </span>
                 ))}
               </div>
-            </div>
+            </motion.div>
           ))}
         </div>
       </div>

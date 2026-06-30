@@ -1,3 +1,5 @@
+import { motion } from 'framer-motion';
+
 function Hero() {
   const handleScroll = (e, targetId) => {
     e.preventDefault();
@@ -20,14 +22,19 @@ function Hero() {
     <section id="hero" className="section hero-section">
       <div className="container">
         <div className="hero-grid">
-          <div className="hero-content">
+          <motion.div 
+            className="hero-content"
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, ease: "easeOut" }}
+          >
             <div className="hero-status-pill">
               <span className="status-dot"></span>
               <span>Available for Fullstack Internship</span>
             </div>
             
             <h1 className="hero-title">
-              Crafting premium<br />web experiences.
+              Crafting premium<br /><span className="highlight">web experiences.</span>
             </h1>
             
             <p className="hero-description">
@@ -35,17 +42,26 @@ function Hero() {
             </p>
             
             <div className="hero-actions">
-              <a href="#projects" onClick={(e) => handleScroll(e, 'projects')} className="btn-vercel">
+              <a href="#projects" onClick={(e) => handleScroll(e, 'projects')} className="btn btn-primary">
                 Explore Projects
               </a>
-              <a href="#contact" onClick={(e) => handleScroll(e, 'contact')} className="btn-vercel-outline">
+              <a href="#contact" onClick={(e) => handleScroll(e, 'contact')} className="btn btn-outline">
                 Contact Me
               </a>
             </div>
-          </div>
+          </motion.div>
           
-          <div className="hero-visual">
-            <div className="dashboard-mockup">
+          <motion.div 
+            className="hero-visual"
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 1, delay: 0.2, ease: "easeOut" }}
+          >
+            <motion.div 
+              className="dashboard-mockup"
+              animate={{ y: [0, -10, 0] }}
+              transition={{ repeat: Infinity, duration: 6, ease: "easeInOut" }}
+            >
               <div className="mockup-header">
                 <div className="mockup-dots">
                   <span className="mockup-dot"></span>
@@ -88,8 +104,8 @@ function Hero() {
                   <span className="code-text"><span className="code-keyword">export default</span> <span className="code-function">initPortfolio</span>(developer);</span>
                 </div>
               </div>
-            </div>
-          </div>
+            </motion.div>
+          </motion.div>
         </div>
       </div>
     </section>

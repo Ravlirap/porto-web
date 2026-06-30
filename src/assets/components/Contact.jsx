@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { motion } from 'framer-motion';
 
 function Contact() {
   const [formState, setFormState] = useState({ name: '', email: '', message: '' });
@@ -25,40 +26,58 @@ function Contact() {
   return (
     <section id="contact" className="section">
       <div className="container">
-        <div className="section-header">
+        <motion.div 
+          className="section-header"
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+        >
           <span className="section-label">05. Contact</span>
           <h2 className="section-title">Get In Touch</h2>
           <p className="section-subtitle">Have an internship opening, a project idea, or just want to connect? Drop a message.</p>
-        </div>
+        </motion.div>
         
-        <div className="contact-grid">
-          <div className="contact-info">
+        <div className="grid grid-2">
+          <motion.div 
+            className="contact-info"
+            initial={{ opacity: 0, x: -30 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+          >
             <div>
-              <h3 className="contact-info-title">Let's build something.</h3>
-              <p className="contact-info-desc">
+              <h3 className="contact-info-title" style={{ fontSize: '1.5rem', fontWeight: '700', marginBottom: '16px', color: 'var(--text-primary)' }}>Let's build something.</h3>
+              <p className="contact-info-desc" style={{ color: 'var(--text-secondary)', marginBottom: '32px' }}>
                 I am actively seeking internship opportunities starting in 2026. If you are looking for a motivated developer who values performance, clean code, and solid engineering, I would love to hear from you.
               </p>
             </div>
             
-            <ul className="contact-details">
-              <li className="contact-detail-item">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <ul className="contact-details" style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              <li className="contact-detail-item" style={{ display: 'flex', alignItems: 'center', gap: '12px', color: 'var(--text-secondary)' }}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'var(--accent-cyan)' }}>
                   <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
                   <polyline points="22,6 12,13 2,6"></polyline>
                 </svg>
                 <span>Rav@example.com</span>
               </li>
-              <li className="contact-detail-item">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <li className="contact-detail-item" style={{ display: 'flex', alignItems: 'center', gap: '12px', color: 'var(--text-secondary)' }}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'var(--accent-cyan)' }}>
                   <path d="M12 2a10 10 0 0 0-10 10c0 5.25 10 12 10 12s10-6.75 10-12a10 10 0 0 0-10-10z"></path>
                   <circle cx="12" cy="10" r="3"></circle>
                 </svg>
                 <span>Indonesia (WIB / UTC+7)</span>
               </li>
             </ul>
-          </div>
+          </motion.div>
           
-          <div className="contact-form-wrapper">
+          <motion.div 
+            className="glass-card"
+            initial={{ opacity: 0, x: 30 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, delay: 0.4 }}
+          >
             <form onSubmit={handleSubmit} className="contact-form">
               <div className="form-group-row">
                 <div className="form-group">
@@ -102,8 +121,8 @@ function Contact() {
                 ></textarea>
               </div>
               
-              <div>
-                <button type="submit" className="btn-vercel">
+              <div style={{ marginTop: '24px' }}>
+                <button type="submit" className="btn btn-primary" style={{ width: '100%' }}>
                   Send Message
                 </button>
               </div>
@@ -119,7 +138,7 @@ function Contact() {
                 </p>
               )}
             </form>
-          </div>
+          </motion.div>
         </div>
       </div>
     </section>
