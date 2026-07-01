@@ -213,22 +213,16 @@ function Projects() {
           </div>
 
           {/* ── Filter Bar ── */}
-          <div style={{
-            display: 'flex',
-            flexWrap: 'wrap',
-            gap: 12,
-            marginBottom: 32,
-            alignItems: 'center',
-          }}>
+          <div className="projects-filter-bar">
             {/* Search */}
-            <form onSubmit={handleSearch} style={{ display: 'flex', gap: 8, flex: 1, minWidth: 220 }}>
+            <form onSubmit={handleSearch} style={{ display: 'flex', gap: 8, flex: 1, minWidth: 0 }}>
               <input
                 type="text"
                 value={searchInput}
                 onChange={(e) => setSearchInput(e.target.value)}
                 placeholder="Search projects..."
                 className="form-input"
-                style={{ flex: 1, padding: '8px 14px', fontSize: '0.85rem' }}
+                style={{ flex: 1, padding: '8px 14px', fontSize: '0.85rem', minWidth: 0 }}
               />
               <button type="submit" className="btn-vercel" style={{ padding: '8px 16px', whiteSpace: 'nowrap' }}>
                 Search
@@ -236,13 +230,13 @@ function Projects() {
             </form>
 
             {/* Status Filter */}
-            <div style={{ display: 'flex', gap: 8 }}>
+            <div className="projects-status-filters">
               {['', 'active', 'in_progress', 'archived'].map((s) => (
                 <button
                   key={s || 'all'}
                   onClick={() => handleStatusChange(s)}
                   style={{
-                    padding: '7px 14px',
+                    padding: '7px 12px',
                     borderRadius: 6,
                     border: statusFilter === s
                       ? '1px solid rgba(255,255,255,0.3)'

@@ -83,7 +83,7 @@ function Register({ onRegisterSuccess }) {
           background: '#0a0a0a',
           border: '1px solid rgba(255,255,255,0.08)',
           borderRadius: 10,
-          padding: 36,
+          padding: 'clamp(20px, 5vw, 36px)',
           boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
         }}>
           <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, memo, useMemo } from 'react';
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
@@ -11,7 +11,7 @@ const authHeader = () => ({
 const fmt = (n) => Number(n).toLocaleString('id-ID');
 
 // ─── Stat Card ────────────────────────────────────────────────
-function StatCard({ label, value, sub, color = '#fff' }) {
+const StatCard = memo(function StatCard({ label, value, sub, color = '#fff' }) {
   return (
     <div style={{
       background: '#0a0a0a',
@@ -28,10 +28,10 @@ function StatCard({ label, value, sub, color = '#fff' }) {
       {sub && <p style={{ fontSize: '0.78rem', color: '#555', marginTop: 6 }}>{sub}</p>}
     </div>
   );
-}
+});
 
 // ─── Mini Bar Chart (native SVG, no library) ─────────────────
-function BarChart({ data }) {
+const BarChart = memo(function BarChart({ data }) {
   if (!data || data.length === 0) return null;
 
   const W = 600, H = 160, PAD = { top: 16, right: 16, bottom: 40, left: 48 };
@@ -90,10 +90,10 @@ function BarChart({ data }) {
       })}
     </svg>
   );
-}
+});
 
 // ─── Role Badge ───────────────────────────────────────────────
-function RoleBadge({ role }) {
+const RoleBadge = memo(function RoleBadge({ role }) {
   const map = {
     admin:  { color: '#f43f5e', bg: 'rgba(244,63,94,0.1)',   border: 'rgba(244,63,94,0.3)' },
     editor: { color: '#f59e0b', bg: 'rgba(245,158,11,0.1)',  border: 'rgba(245,158,11,0.3)' },
@@ -113,7 +113,7 @@ function RoleBadge({ role }) {
       {role}
     </span>
   );
-}
+});
 
 // ─── Pagination ───────────────────────────────────────────────
 function Pagination({ meta, onChange }) {
@@ -192,7 +192,7 @@ function AdminDashboard({ user, onLogout }) {
   }, []);
 
   // ── Fetch users ─────────────────────────────────────────────
-  const fetchUsers = useCallback(async () => {
+  const fetchUsers = useCallback(async (signal) => {
     setULoading(true);
     try {
       const params = new URLSearchParams({ page, limit: 20 });
@@ -200,19 +200,41 @@ function AdminDashboard({ user, onLogout }) {
       if (roleF)   params.append('role',      roleF);
       if (activeF) params.append('is_active', activeF);
 
-      const res  = await fetch(`${API_BASE}/api/admin/users?${params}`, { headers: authHeader() });
+      const res  = await fetch(`${API_BASE}/api/admin/users?${params}`, { 
+        headers: authHeader(),
+        signal 
+      });
       const json = await res.json();
       if (!res.ok) throw new Error(json.message);
       setUsers(json.data);
       setMeta(json.meta);
     } catch (err) {
-      setError(err.message);
+      if (err.name !== 'AbortError') {
+        setError(err.message);
+      }
     } finally {
-      setULoading(false);
+      if (!signal || !signal.aborted) {
+        setULoading(false);
+      }
     }
   }, [page, search, roleF, activeF]);
 
-  useEffect(() => { fetchUsers(); }, [fetchUsers]);
+  // Handle fetch trigger with AbortController cancellation
+  useEffect(() => {
+    const controller = new AbortController();
+    fetchUsers(controller.signal);
+    return () => controller.abort();
+  }, [fetchUsers]);
+
+  // Debounce search input typing to search automatically
+  useEffect(() => {
+    const delayDebounceFn = setTimeout(() => {
+      setSearch(inputVal.trim());
+      setPage(1);
+    }, 300);
+
+    return () => clearTimeout(delayDebounceFn);
+  }, [inputVal]);
 
   const handleSearch = (e) => {
     e.preventDefault();
@@ -244,6 +266,52 @@ function AdminDashboard({ user, onLogout }) {
     </button>
   );
 
+  // Memoized stats cards section
+  const statsSection = useMemo(() => {
+    if (loading) {
+      return (
+        <div className="admin-stats-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px,1fr))', gap: 12, marginBottom: 32 }}>
+          {Array.from({ length: 6 }).map((_, i) => (
+            <div key={i} style={{ background: '#0a0a0a', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 8, padding: '24px 28px', height: 90, animation: 'skeleton-pulse 1.4s ease infinite' }} />
+          ))}
+        </div>
+      );
+    }
+    if (!stats) return null;
+    return (
+      <div className="admin-stats-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px,1fr))', gap: 12, marginBottom: 32 }}>
+        <StatCard label="Total Users"    value={fmt(stats.total)}          sub={`+${fmt(stats.new_this_month)} bulan ini`} />
+        <StatCard label="Aktif"          value={fmt(stats.active)}         color="#10b981" />
+        <StatCard label="Nonaktif"       value={fmt(stats.inactive)}       color="#f43f5e" />
+        <StatCard label="Admin"          value={fmt(stats.admins)}         color="#f59e0b" />
+        <StatCard label="Editor"         value={fmt(stats.editors)}        color="#3b82f6" />
+        <StatCard label="Minggu ini"     value={`+${fmt(stats.new_this_week)}`} color="#a78bfa" />
+      </div>
+    );
+  }, [loading, stats]);
+
+  // Memoized monthly chart section
+  const chartSection = useMemo(() => {
+    if (monthly.length === 0) return null;
+    return (
+      <div style={{
+        background: '#0a0a0a',
+        border: '1px solid rgba(255,255,255,0.08)',
+        borderRadius: 8,
+        padding: 28,
+        marginBottom: 40,
+      }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
+          <div>
+            <h2 style={{ fontSize: '1rem', fontWeight: 600, marginBottom: 2 }}>Registrasi Users</h2>
+            <p style={{ color: '#555', fontSize: '0.78rem', fontFamily: 'var(--font-mono)' }}>12 bulan terakhir</p>
+          </div>
+        </div>
+        <BarChart data={monthly} />
+      </div>
+    );
+  }, [monthly]);
+
   return (
     <div style={{ minHeight: '100vh', background: '#000', color: '#fff', fontFamily: 'var(--font-sans)' }}>
 
@@ -253,10 +321,10 @@ function AdminDashboard({ user, onLogout }) {
         background: 'rgba(0,0,0,0.8)',
         backdropFilter: 'blur(12px)',
         borderBottom: '1px solid rgba(255,255,255,0.08)',
-        padding: '0 32px', height: 60,
+        padding: '0 16px', height: 56,
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 24 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
               <polygon points="12 2 2 22 22 22" />
@@ -267,13 +335,13 @@ function AdminDashboard({ user, onLogout }) {
           <span style={{ color: '#888', fontSize: '0.85rem', fontFamily: 'var(--font-mono)' }}>admin</span>
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-          <span style={{ fontSize: '0.82rem', color: '#666' }}>{user?.email}</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <span style={{ fontSize: '0.78rem', color: '#666', display: 'none', maxWidth: 140, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} className="admin-email">{user?.email}</span>
           <RoleBadge role={user?.role || 'admin'} />
           <button
             onClick={handleLogout}
             style={{
-              padding: '6px 14px', borderRadius: 6, fontSize: '0.8rem',
+              padding: '6px 12px', borderRadius: 6, fontSize: '0.78rem',
               border: '1px solid rgba(255,255,255,0.1)',
               background: 'transparent', color: '#888', cursor: 'pointer',
             }}
@@ -283,11 +351,11 @@ function AdminDashboard({ user, onLogout }) {
         </div>
       </header>
 
-      <main style={{ maxWidth: 1200, margin: '0 auto', padding: '40px 32px' }}>
+      <main style={{ maxWidth: 1200, margin: '0 auto', padding: 'clamp(16px, 4vw, 40px) clamp(16px, 4vw, 32px)' }}>
 
         {/* ── Page Title ── */}
-        <div style={{ marginBottom: 40 }}>
-          <h1 style={{ fontSize: '1.6rem', fontWeight: 700, letterSpacing: '-0.03em', marginBottom: 4 }}>
+        <div style={{ marginBottom: 28 }}>
+          <h1 style={{ fontSize: '1.4rem', fontWeight: 700, letterSpacing: '-0.03em', marginBottom: 4 }}>
             Dashboard
           </h1>
           <p style={{ color: '#555', fontSize: '0.875rem' }}>
@@ -302,41 +370,10 @@ function AdminDashboard({ user, onLogout }) {
         )}
 
         {/* ── Stat Cards ── */}
-        {loading ? (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px,1fr))', gap: 16, marginBottom: 40 }}>
-            {Array.from({ length: 6 }).map((_, i) => (
-              <div key={i} style={{ background: '#0a0a0a', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 8, padding: '24px 28px', height: 90, animation: 'skeleton-pulse 1.4s ease infinite' }} />
-            ))}
-          </div>
-        ) : stats && (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px,1fr))', gap: 16, marginBottom: 40 }}>
-            <StatCard label="Total Users"    value={fmt(stats.total)}          sub={`+${fmt(stats.new_this_month)} bulan ini`} />
-            <StatCard label="Aktif"          value={fmt(stats.active)}         color="#10b981" />
-            <StatCard label="Nonaktif"       value={fmt(stats.inactive)}       color="#f43f5e" />
-            <StatCard label="Admin"          value={fmt(stats.admins)}         color="#f59e0b" />
-            <StatCard label="Editor"         value={fmt(stats.editors)}        color="#3b82f6" />
-            <StatCard label="Minggu ini"     value={`+${fmt(stats.new_this_week)}`} color="#a78bfa" />
-          </div>
-        )}
+        {statsSection}
 
         {/* ── Bar Chart ── */}
-        {monthly.length > 0 && (
-          <div style={{
-            background: '#0a0a0a',
-            border: '1px solid rgba(255,255,255,0.08)',
-            borderRadius: 8,
-            padding: 28,
-            marginBottom: 40,
-          }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
-              <div>
-                <h2 style={{ fontSize: '1rem', fontWeight: 600, marginBottom: 2 }}>Registrasi Users</h2>
-                <p style={{ color: '#555', fontSize: '0.78rem', fontFamily: 'var(--font-mono)' }}>12 bulan terakhir</p>
-              </div>
-            </div>
-            <BarChart data={monthly} />
-          </div>
-        )}
+        {chartSection}
 
         {/* ── Users Table ── */}
         <div style={{
@@ -346,8 +383,8 @@ function AdminDashboard({ user, onLogout }) {
           overflow: 'hidden',
         }}>
           {/* Table Header */}
-          <div style={{ padding: '20px 24px', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12, marginBottom: 16 }}>
+          <div style={{ padding: '16px', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 12, marginBottom: 16 }}>
               <div>
                 <h2 style={{ fontSize: '1rem', fontWeight: 600 }}>Manajemen Users</h2>
                 {meta && (
@@ -358,7 +395,7 @@ function AdminDashboard({ user, onLogout }) {
               </div>
 
               {/* Search */}
-              <form onSubmit={handleSearch} style={{ display: 'flex', gap: 8 }}>
+              <form onSubmit={handleSearch} style={{ display: 'flex', gap: 8, flex: 1, minWidth: 0 }}>
                 <input
                   type="text"
                   value={inputVal}
@@ -367,14 +404,14 @@ function AdminDashboard({ user, onLogout }) {
                   style={{
                     padding: '7px 12px', background: '#030303',
                     border: '1px solid rgba(255,255,255,0.08)', borderRadius: 6,
-                    color: '#fff', fontSize: '0.82rem', outline: 'none', width: 220,
+                    color: '#fff', fontSize: '0.82rem', outline: 'none', flex: 1, minWidth: 0,
                     fontFamily: 'var(--font-sans)',
                   }}
                 />
                 <button type="submit" style={{
                   padding: '7px 14px', background: '#fff', color: '#000',
                   border: 'none', borderRadius: 6, fontSize: '0.82rem',
-                  fontWeight: 600, cursor: 'pointer',
+                  fontWeight: 600, cursor: 'pointer', whiteSpace: 'nowrap', flexShrink: 0,
                 }}>
                   Cari
                 </button>

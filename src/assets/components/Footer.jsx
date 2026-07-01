@@ -30,7 +30,7 @@ function Footer() {
       transition={{ duration: 0.8 }}
     >
       <div className="container">
-        <div className="footer-top" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '32px', marginBottom: '40px' }}>
+        <div className="footer-top">
           <div>
             <a href="#hero" className="logo" onClick={(e) => handleScroll(e, 'hero')} style={{ marginBottom: '12px' }}>
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'var(--text-primary)' }}>
@@ -41,7 +41,7 @@ function Footer() {
             <p className="footer-tagline" style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', maxWidth: '300px' }}>Engineered with focus, minimalism, and speed.</p>
           </div>
           
-          <ul className="footer-nav" style={{ listStyle: 'none', display: 'flex', gap: '24px', flexWrap: 'wrap' }}>
+          <ul className="footer-nav">
             <li><a href="#about" onClick={(e) => handleScroll(e, 'about')} className="nav-link" style={{ padding: '0' }}>About</a></li>
             <li><a href="#skills" onClick={(e) => handleScroll(e, 'skills')} className="nav-link" style={{ padding: '0' }}>Skills</a></li>
             <li><a href="#projects" onClick={(e) => handleScroll(e, 'projects')} className="nav-link" style={{ padding: '0' }}>Projects</a></li>
@@ -49,7 +49,7 @@ function Footer() {
           </ul>
         </div>
         
-        <div className="footer-bottom" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px', paddingTop: '24px', borderTop: '1px solid var(--glass-border)' }}>
+        <div className="footer-bottom">
           <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>&copy; {currentYear} Rav.dev. All rights reserved.</p>
           
           <div className="social-links" style={{ display: 'flex', gap: '16px' }}>

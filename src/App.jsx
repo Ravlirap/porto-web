@@ -1,10 +1,11 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import Navbar         from './layouts/Navbar.jsx';
 import Home           from './assets/pages/home/Home.jsx';
 import Login          from './assets/pages/auth/Login.jsx';
 import Register       from './assets/pages/auth/Register.jsx';
-import AdminDashboard from './assets/pages/admin/AdminDashboard.jsx';
+
+const AdminDashboard = lazy(() => import('./assets/pages/admin/AdminDashboard.jsx'));
 
 // ─── Auth Guard: redirect ke /login jika belum login ─────────
 function PrivateRoute({ user, role, children }) {
@@ -61,7 +62,13 @@ function AppRoutes() {
       {/* ── Protected: Admin only ── */}
       <Route path="/admin" element={
         <PrivateRoute user={user} role="admin">
-          <AdminDashboard user={user} onLogout={handleLogout} />
+          <Suspense fallback={
+            <div style={{ minHeight: '100vh', background: '#000', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-mono)', fontSize: '0.85rem' }}>
+              Loading Dashboard...
+            </div>
+          }>
+            <AdminDashboard user={user} onLogout={handleLogout} />
+          </Suspense>
         </PrivateRoute>
       } />
 
