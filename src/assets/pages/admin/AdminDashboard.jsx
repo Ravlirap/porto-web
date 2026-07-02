@@ -13,19 +13,10 @@ const fmt = (n) => Number(n).toLocaleString('id-ID');
 // ─── Stat Card ────────────────────────────────────────────────
 const StatCard = memo(function StatCard({ label, value, sub, color = '#fff' }) {
   return (
-    <div style={{
-      background: '#0a0a0a',
-      border: '1px solid rgba(255,255,255,0.08)',
-      borderRadius: 8,
-      padding: '24px 28px',
-    }}>
-      <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', color: '#555', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 10 }}>
-        {label}
-      </p>
-      <p style={{ fontSize: '2rem', fontWeight: 700, color, letterSpacing: '-0.03em', lineHeight: 1 }}>
-        {value}
-      </p>
-      {sub && <p style={{ fontSize: '0.78rem', color: '#555', marginTop: 6 }}>{sub}</p>}
+    <div className="admin-stat-card" style={{ '--card-accent': color }}>
+      <p className="admin-stat-label">{label}</p>
+      <p className="admin-stat-value" style={{ color }}>{value}</p>
+      {sub && <p className="admin-stat-sub">{sub}</p>}
     </div>
   );
 });
@@ -71,9 +62,10 @@ const BarChart = memo(function BarChart({ data }) {
         return (
           <g key={i}>
             <rect
+              className="admin-chart-bar"
               x={x} y={y} width={barW} height={barH}
               rx="3"
-              fill={isLast ? '#fff' : 'rgba(255,255,255,0.12)'}
+              fill={isLast ? 'var(--accent-cyan)' : 'rgba(255,255,255,0.12)'}
             />
             <text
               x={x + barW / 2}
@@ -95,9 +87,9 @@ const BarChart = memo(function BarChart({ data }) {
 // ─── Role Badge ───────────────────────────────────────────────
 const RoleBadge = memo(function RoleBadge({ role }) {
   const map = {
-    admin:  { color: '#f43f5e', bg: 'rgba(244,63,94,0.1)',   border: 'rgba(244,63,94,0.3)' },
-    editor: { color: '#f59e0b', bg: 'rgba(245,158,11,0.1)',  border: 'rgba(245,158,11,0.3)' },
-    user:   { color: '#6b7280', bg: 'rgba(107,114,128,0.1)', border: 'rgba(107,114,128,0.3)' },
+    admin:  { color: '#f43f5e', bg: 'rgba(244,63,94,0.08)',   border: 'rgba(244,63,94,0.2)' },
+    editor: { color: '#f59e0b', bg: 'rgba(245,158,11,0.08)',  border: 'rgba(245,158,11,0.2)' },
+    user:   { color: '#a1a1aa', bg: 'rgba(161,161,170,0.08)', border: 'rgba(161,161,170,0.2)' },
   };
   const s = map[role] || map.user;
   return (
@@ -105,10 +97,14 @@ const RoleBadge = memo(function RoleBadge({ role }) {
       fontFamily: 'var(--font-mono)',
       fontSize: '0.68rem',
       padding: '2px 8px',
-      borderRadius: 9999,
+      borderRadius: '6px',
       color: s.color,
       background: s.bg,
       border: `1px solid ${s.border}`,
+      textTransform: 'uppercase',
+      letterSpacing: '0.05em',
+      fontWeight: 500,
+      display: 'inline-block',
     }}>
       {role}
     </span>
@@ -134,22 +130,14 @@ function Pagination({ meta, onChange }) {
       key={`${content}-${targetPage}`}
       disabled={disabled || content === '…'}
       onClick={() => content !== '…' && onChange(targetPage)}
-      style={{
-        minWidth: 34, height: 34, padding: '0 8px',
-        borderRadius: 6,
-        border: active ? '1px solid rgba(255,255,255,0.3)' : '1px solid rgba(255,255,255,0.08)',
-        background: active ? 'rgba(255,255,255,0.08)' : 'transparent',
-        color: disabled || content === '…' ? '#444' : active ? '#fff' : '#888',
-        fontSize: '0.78rem', fontFamily: 'var(--font-mono)',
-        cursor: disabled || content === '…' ? 'default' : 'pointer',
-      }}
+      className={`admin-btn-page ${active ? 'active' : ''}`}
     >
       {content}
     </button>
   );
 
   return (
-    <div style={{ display: 'flex', gap: 4, alignItems: 'center', flexWrap: 'wrap' }}>
+    <div className="admin-pagination-controls">
       {btn('←', page - 1, !meta.hasPrevPage)}
       {pages.map((p, i) => btn(p, p, false, p === page))}
       {btn('→', page + 1, !meta.hasNextPage)}
@@ -253,14 +241,7 @@ function AdminDashboard({ user, onLogout }) {
     <button
       key={val}
       onClick={() => { setter(val); setPage(1); }}
-      style={{
-        padding: '6px 12px', borderRadius: 6, fontSize: '0.78rem',
-        fontFamily: 'var(--font-mono)',
-        border: current === val ? '1px solid rgba(255,255,255,0.3)' : '1px solid rgba(255,255,255,0.08)',
-        background: current === val ? 'rgba(255,255,255,0.07)' : 'transparent',
-        color: current === val ? '#fff' : '#666',
-        cursor: 'pointer',
-      }}
+      className={`admin-btn-filter ${current === val ? 'active' : ''}`}
     >
       {label}
     </button>
@@ -270,17 +251,17 @@ function AdminDashboard({ user, onLogout }) {
   const statsSection = useMemo(() => {
     if (loading) {
       return (
-        <div className="admin-stats-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px,1fr))', gap: 12, marginBottom: 32 }}>
+        <div className="admin-stats-grid">
           {Array.from({ length: 6 }).map((_, i) => (
-            <div key={i} style={{ background: '#0a0a0a', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 8, padding: '24px 28px', height: 90, animation: 'skeleton-pulse 1.4s ease infinite' }} />
+            <div key={i} className="admin-stat-card" style={{ height: 110, animation: 'skeleton-pulse 1.4s ease infinite' }} />
           ))}
         </div>
       );
     }
     if (!stats) return null;
     return (
-      <div className="admin-stats-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px,1fr))', gap: 12, marginBottom: 32 }}>
-        <StatCard label="Total Users"    value={fmt(stats.total)}          sub={`+${fmt(stats.new_this_month)} bulan ini`} />
+      <div className="admin-stats-grid">
+        <StatCard label="Total Users"    value={fmt(stats.total)}          sub={`+${fmt(stats.new_this_month)} bulan ini`} color="var(--accent-cyan)" />
         <StatCard label="Aktif"          value={fmt(stats.active)}         color="#10b981" />
         <StatCard label="Nonaktif"       value={fmt(stats.inactive)}       color="#f43f5e" />
         <StatCard label="Admin"          value={fmt(stats.admins)}         color="#f59e0b" />
@@ -294,77 +275,58 @@ function AdminDashboard({ user, onLogout }) {
   const chartSection = useMemo(() => {
     if (monthly.length === 0) return null;
     return (
-      <div style={{
-        background: '#0a0a0a',
-        border: '1px solid rgba(255,255,255,0.08)',
-        borderRadius: 8,
-        padding: 28,
-        marginBottom: 40,
-      }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
+      <div className="admin-chart-card">
+        <div className="admin-chart-header">
           <div>
-            <h2 style={{ fontSize: '1rem', fontWeight: 600, marginBottom: 2 }}>Registrasi Users</h2>
-            <p style={{ color: '#555', fontSize: '0.78rem', fontFamily: 'var(--font-mono)' }}>12 bulan terakhir</p>
+            <h2 className="admin-chart-title">Registrasi Users</h2>
+            <p className="admin-chart-subtitle">12 bulan terakhir</p>
           </div>
         </div>
-        <BarChart data={monthly} />
+        <div className="admin-chart-svg-container">
+          <BarChart data={monthly} />
+        </div>
       </div>
     );
   }, [monthly]);
 
   return (
-    <div style={{ minHeight: '100vh', background: '#000', color: '#fff', fontFamily: 'var(--font-sans)' }}>
+    <div className="admin-dashboard-container">
+      {/* Background Glowing Blobs for Depth */}
+      <div className="bg-glow top-left" />
+      <div className="bg-glow bottom-right" />
 
       {/* ── Topbar ── */}
-      <header style={{
-        position: 'sticky', top: 0, zIndex: 100,
-        background: 'rgba(0,0,0,0.8)',
-        backdropFilter: 'blur(12px)',
-        borderBottom: '1px solid rgba(255,255,255,0.08)',
-        padding: '0 16px', height: 56,
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+      <header className="admin-header">
+        <div className="admin-header-left">
+          <div className="admin-logo">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
               <polygon points="12 2 2 22 22 22" />
             </svg>
-            <span style={{ fontWeight: 600, fontSize: '0.95rem' }}>Rav.dev</span>
+            <span>Rav.dev</span>
           </div>
           <span style={{ color: 'rgba(255,255,255,0.15)', fontSize: '1rem' }}>/</span>
-          <span style={{ color: '#888', fontSize: '0.85rem', fontFamily: 'var(--font-mono)' }}>admin</span>
+          <span style={{ color: 'var(--text-muted)', fontSize: '0.85rem', fontFamily: 'var(--font-mono)' }}>admin</span>
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <span style={{ fontSize: '0.78rem', color: '#666', display: 'none', maxWidth: 140, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} className="admin-email">{user?.email}</span>
+        <div className="admin-header-right">
+          <span className="admin-email">{user?.email}</span>
           <RoleBadge role={user?.role || 'admin'} />
-          <button
-            onClick={handleLogout}
-            style={{
-              padding: '6px 12px', borderRadius: 6, fontSize: '0.78rem',
-              border: '1px solid rgba(255,255,255,0.1)',
-              background: 'transparent', color: '#888', cursor: 'pointer',
-            }}
-          >
+          <button onClick={handleLogout} className="admin-btn-logout">
             Logout
           </button>
         </div>
       </header>
 
-      <main style={{ maxWidth: 1200, margin: '0 auto', padding: 'clamp(16px, 4vw, 40px) clamp(16px, 4vw, 32px)' }}>
+      <main className="admin-main">
 
         {/* ── Page Title ── */}
-        <div style={{ marginBottom: 28 }}>
-          <h1 style={{ fontSize: '1.4rem', fontWeight: 700, letterSpacing: '-0.03em', marginBottom: 4 }}>
-            Dashboard
-          </h1>
-          <p style={{ color: '#555', fontSize: '0.875rem' }}>
-            Overview data users dan statistik platform.
-          </p>
+        <div className="admin-title-section">
+          <h1>Dashboard</h1>
+          <p>Overview data users dan statistik platform.</p>
         </div>
 
         {error && (
-          <div style={{ marginBottom: 24, padding: '14px 18px', background: 'rgba(244,63,94,0.08)', border: '1px solid rgba(244,63,94,0.25)', borderRadius: 8, color: '#f43f5e', fontSize: '0.85rem', fontFamily: 'var(--font-mono)' }}>
+          <div style={{ marginBottom: 24, padding: '14px 18px', background: 'rgba(244,63,94,0.06)', border: '1px solid rgba(244,63,94,0.2)', borderRadius: 8, color: '#f43f5e', fontSize: '0.85rem', fontFamily: 'var(--font-mono)' }}>
             ⚠ {error}
           </div>
         )}
@@ -376,58 +338,44 @@ function AdminDashboard({ user, onLogout }) {
         {chartSection}
 
         {/* ── Users Table ── */}
-        <div style={{
-          background: '#0a0a0a',
-          border: '1px solid rgba(255,255,255,0.08)',
-          borderRadius: 8,
-          overflow: 'hidden',
-        }}>
+        <div className="admin-table-card">
           {/* Table Header */}
-          <div style={{ padding: '16px', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 12, marginBottom: 16 }}>
-              <div>
-                <h2 style={{ fontSize: '1rem', fontWeight: 600 }}>Manajemen Users</h2>
+          <div className="admin-table-header">
+            <div className="admin-table-header-top">
+              <div className="admin-table-title-group">
+                <h2>Manajemen Users</h2>
                 {meta && (
-                  <p style={{ color: '#555', fontSize: '0.72rem', fontFamily: 'var(--font-mono)', marginTop: 2 }}>
-                    {fmt(meta.totalData)} users · Hal. {meta.page}/{fmt(meta.totalPages)}
+                  <p>
+                    {meta.totalData === 10000 ? '10.000+' : fmt(meta.totalData)} users · Hal. {meta.page}/{meta.totalData === 10000 ? '500+' : fmt(meta.totalPages)}
                   </p>
                 )}
               </div>
 
               {/* Search */}
-              <form onSubmit={handleSearch} style={{ display: 'flex', gap: 8, flex: 1, minWidth: 0 }}>
+              <form onSubmit={handleSearch} className="admin-search-form">
                 <input
                   type="text"
                   value={inputVal}
                   onChange={e => setInputVal(e.target.value)}
                   placeholder="Cari nama / email..."
-                  style={{
-                    padding: '7px 12px', background: '#030303',
-                    border: '1px solid rgba(255,255,255,0.08)', borderRadius: 6,
-                    color: '#fff', fontSize: '0.82rem', outline: 'none', flex: 1, minWidth: 0,
-                    fontFamily: 'var(--font-sans)',
-                  }}
+                  className="admin-search-input"
                 />
-                <button type="submit" style={{
-                  padding: '7px 14px', background: '#fff', color: '#000',
-                  border: 'none', borderRadius: 6, fontSize: '0.82rem',
-                  fontWeight: 600, cursor: 'pointer', whiteSpace: 'nowrap', flexShrink: 0,
-                }}>
+                <button type="submit" className="admin-search-btn">
                   Cari
                 </button>
               </form>
             </div>
 
             {/* Filters */}
-            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-              <div style={{ display: 'flex', gap: 6 }}>
+            <div className="admin-filters-wrapper">
+              <div className="admin-filter-group">
                 {filterBtn('Semua Role', '',       roleF, setRoleF)}
                 {filterBtn('Admin',      'admin',  roleF, setRoleF)}
                 {filterBtn('Editor',     'editor', roleF, setRoleF)}
                 {filterBtn('User',       'user',   roleF, setRoleF)}
               </div>
-              <div style={{ width: 1, background: 'rgba(255,255,255,0.08)' }} />
-              <div style={{ display: 'flex', gap: 6 }}>
+              <div className="admin-filter-divider" />
+              <div className="admin-filter-group">
                 {filterBtn('Semua Status', '',      activeF, setActiveF)}
                 {filterBtn('Aktif',        'true',  activeF, setActiveF)}
                 {filterBtn('Nonaktif',     'false', activeF, setActiveF)}
@@ -436,17 +384,12 @@ function AdminDashboard({ user, onLogout }) {
           </div>
 
           {/* Table Body */}
-          <div style={{ overflowX: 'auto' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem' }}>
+          <div className="admin-table-container">
+            <table className="admin-table">
               <thead>
-                <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+                <tr>
                   {['ID', 'Nama', 'Email', 'Role', 'Status', 'Bergabung'].map(h => (
-                    <th key={h} style={{
-                      padding: '12px 16px', textAlign: 'left',
-                      fontFamily: 'var(--font-mono)', fontSize: '0.7rem',
-                      color: '#555', textTransform: 'uppercase', letterSpacing: '0.08em',
-                      fontWeight: 500, whiteSpace: 'nowrap',
-                    }}>
+                    <th key={h} className="admin-th">
                       {h}
                     </th>
                   ))}
@@ -455,9 +398,9 @@ function AdminDashboard({ user, onLogout }) {
               <tbody>
                 {uLoading ? (
                   Array.from({ length: 10 }).map((_, i) => (
-                    <tr key={i} style={{ borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
+                    <tr key={i} className="admin-tr">
                       {Array.from({ length: 6 }).map((_, j) => (
-                        <td key={j} style={{ padding: '14px 16px' }}>
+                        <td key={j} className="admin-td">
                           <div style={{ height: 12, width: `${[30,80,100,40,40,50][j]}%`, background: 'rgba(255,255,255,0.05)', borderRadius: 4, animation: 'skeleton-pulse 1.4s ease infinite' }} />
                         </td>
                       ))}
@@ -465,41 +408,30 @@ function AdminDashboard({ user, onLogout }) {
                   ))
                 ) : users.length === 0 ? (
                   <tr>
-                    <td colSpan={6} style={{ padding: '48px', textAlign: 'center', color: '#444', fontFamily: 'var(--font-mono)', fontSize: '0.82rem' }}>
+                    <td colSpan={6} style={{ padding: '48px', textAlign: 'center', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)', fontSize: '0.82rem' }}>
                       Tidak ada data ditemukan.
                     </td>
                   </tr>
                 ) : users.map((u) => (
-                  <tr
-                    key={u.id}
-                    style={{ borderBottom: '1px solid rgba(255,255,255,0.04)', transition: 'background 0.1s' }}
-                    onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.02)'}
-                    onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
-                  >
-                    <td style={{ padding: '13px 16px', color: '#555', fontFamily: 'var(--font-mono)', fontSize: '0.75rem' }}>
+                  <tr key={u.id} className="admin-tr">
+                    <td className="admin-td" style={{ color: 'var(--text-muted)', fontFamily: 'var(--font-mono)', fontSize: '0.75rem' }}>
                       #{u.id}
                     </td>
-                    <td style={{ padding: '13px 16px', fontWeight: 500, color: '#e5e5e5', whiteSpace: 'nowrap' }}>
+                    <td className="admin-td" style={{ fontWeight: 500, color: 'var(--text-primary)', whiteSpace: 'nowrap' }}>
                       {u.name}
                     </td>
-                    <td style={{ padding: '13px 16px', color: '#888', fontFamily: 'var(--font-mono)', fontSize: '0.78rem' }}>
+                    <td className="admin-td" style={{ color: 'var(--text-secondary)', fontFamily: 'var(--font-mono)', fontSize: '0.78rem' }}>
                       {u.email}
                     </td>
-                    <td style={{ padding: '13px 16px' }}>
+                    <td className="admin-td">
                       <RoleBadge role={u.role} />
                     </td>
-                    <td style={{ padding: '13px 16px' }}>
-                      <span style={{
-                        fontFamily: 'var(--font-mono)', fontSize: '0.68rem',
-                        padding: '2px 8px', borderRadius: 9999,
-                        color:      u.is_active ? '#10b981' : '#6b7280',
-                        background: u.is_active ? 'rgba(16,185,129,0.1)' : 'rgba(107,114,128,0.1)',
-                        border:     u.is_active ? '1px solid rgba(16,185,129,0.3)' : '1px solid rgba(107,114,128,0.3)',
-                      }}>
+                    <td className="admin-td">
+                      <span className={`admin-badge-status ${u.is_active ? 'active' : 'inactive'}`}>
                         {u.is_active ? 'Aktif' : 'Nonaktif'}
                       </span>
                     </td>
-                    <td style={{ padding: '13px 16px', color: '#555', fontFamily: 'var(--font-mono)', fontSize: '0.75rem', whiteSpace: 'nowrap' }}>
+                    <td className="admin-td" style={{ color: 'var(--text-muted)', fontFamily: 'var(--font-mono)', fontSize: '0.75rem', whiteSpace: 'nowrap' }}>
                       {new Date(u.created_at).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })}
                     </td>
                   </tr>
@@ -510,14 +442,9 @@ function AdminDashboard({ user, onLogout }) {
 
           {/* Pagination */}
           {meta && meta.totalPages > 1 && (
-            <div style={{
-              padding: '16px 24px',
-              borderTop: '1px solid rgba(255,255,255,0.06)',
-              display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-              flexWrap: 'wrap', gap: 12,
-            }}>
-              <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.72rem', color: '#555' }}>
-                {fmt((meta.page - 1) * meta.limit + 1)}–{fmt(Math.min(meta.page * meta.limit, meta.totalData))} dari {fmt(meta.totalData)}
+            <div className="admin-pagination-container">
+              <p className="admin-pagination-info">
+                {fmt((meta.page - 1) * meta.limit + 1)}–{fmt(Math.min(meta.page * meta.limit, meta.totalData))} dari {meta.totalData === 10000 ? '10.000+' : fmt(meta.totalData)}
               </p>
               <Pagination meta={meta} onChange={(p) => { setPage(p); window.scrollTo({ top: 0 }); }} />
             </div>

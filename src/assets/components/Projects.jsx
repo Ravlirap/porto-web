@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
@@ -172,9 +172,23 @@ function Projects() {
     fetchProjects();
   }, [fetchProjects]);
 
+  const debounceRef = useRef(null);
+
+  const handleSearchInputChange = (e) => {
+    const val = e.target.value;
+    setSearchInput(val);
+    // Debounce 300ms: kirim request hanya setelah user berhenti mengetik
+    clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => {
+      setPage(1);
+      setSearch(val.trim());
+    }, 300);
+  };
+
   // Reset ke page 1 saat filter berubah
   const handleSearch = (e) => {
     e.preventDefault();
+    clearTimeout(debounceRef.current);
     setPage(1);
     setSearch(searchInput.trim());
   };
@@ -219,7 +233,7 @@ function Projects() {
               <input
                 type="text"
                 value={searchInput}
-                onChange={(e) => setSearchInput(e.target.value)}
+                onChange={(e) => handleSearchInputChange(e)}
                 placeholder="Search projects..."
                 className="form-input"
                 style={{ flex: 1, padding: '8px 14px', fontSize: '0.85rem', minWidth: 0 }}
@@ -301,7 +315,17 @@ function Projects() {
                     fontFamily: 'var(--font-mono)',
                     fontSize: '0.85rem',
                   }}>
-                    No projects found.
+                    {search || statusFilter
+                      ? (
+                        <>
+                          <div style={{ fontSize: '2rem', marginBottom: 12 }}>🔍</div>
+                          <div style={{ marginBottom: 6 }}>Tidak ada project ditemukan</div>
+                          <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', opacity: 0.6 }}>
+                            untuk pencarian <span style={{ color: 'var(--text-primary)' }}>"{ search || statusFilter }"</span>
+                          </div>
+                        </>
+                      )
+                      : 'Belum ada project.'}
                   </div>
                 )
                 : projects.map((project) => (
